@@ -1,0 +1,6 @@
+pandas
+numpy
+vectorbt
+yfinance
+kaleido
+nbformat>=4.2.0
