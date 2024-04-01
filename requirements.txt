@@ -1,6 +1,8 @@
 pandas
 numpy
 vectorbt
+dateparser 
 yfinance
 kaleido
 nbformat>=4.2.0
+ta
