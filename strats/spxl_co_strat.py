@@ -1,16 +1,18 @@
 import vectorbt as vbt
 import pandas as pd
 from numba import njit
+from data_process.strategy_data import OHLCData
 
 class StrategyWrapper:
-    def __init__(self, symbol='SPXL', start_date='1/1/2023', interval='1d', take_profit_pct = 20, stop_loss_pct = 0.1):
+    def __init__(self, symbol='SPXL', start_date='1/1/2024', interval='1d', take_profit_pct = 20, stop_loss_pct = 0.1):
         self.symbol = symbol
         self.start_date = start_date
         self.interval = interval
         self.take_profit_pct = take_profit_pct
         self.stop_loss_pct = stop_loss_pct
+        self.data_process = OHLCData()
         self.orders = None
-        self.price = None
+        self.price = self.data_process.produce_data(self.symbol, self.start_date, self.interval)
         self.run()
 
     def download_price(self):
@@ -21,7 +23,6 @@ class StrategyWrapper:
         ).get('Close')
 
     def run(self):
-        self.download_price()
 
         EMA = vbt.IndicatorFactory.from_ta('EMAIndicator')
         ema13 = EMA.run(self.price, 2)
@@ -59,5 +60,5 @@ class StrategyWrapper:
     def get_position_instructions(self):
         if self.orders is not None and len(self.orders) > 0:
             instr = self.orders.iloc[-1]
-            return (instr['Timestamp'], instr['Side'], instr['Price'])
+            return (self.symbol, instr['Timestamp'], instr['Side'], instr['Price'])
         return None
