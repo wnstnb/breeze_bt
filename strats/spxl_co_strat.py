@@ -60,5 +60,5 @@ class StrategyWrapper:
     def get_position_instructions(self):
         if self.orders is not None and len(self.orders) > 0:
             instr = self.orders.iloc[-1]
-            return (self.symbol, instr['Timestamp'], instr['Side'], instr['Price'])
+            return dict(ticker=self.symbol, ts=instr['Timestamp'], side=instr['Side'], price=instr['Price'])
         return None
