@@ -6,3 +6,5 @@ yfinance
 kaleido
 nbformat>=4.2.0
 ta
+supabase
+python-dotenv
