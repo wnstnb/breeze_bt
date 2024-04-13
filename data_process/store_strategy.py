@@ -30,12 +30,12 @@ class ProcessData:
                         return f"An error occurred: Object of type {type(value).__name__} in column '{key}' is not JSON serializable"
 
             # Write the data to the 'strategy_stats' table
-            response = self.supabase.table('strategy_stats').insert(data).execute()
+            response = self.supabase.table('strategy_stats').upsert(data).execute()
 
             # Check if the request was successful
-            if response['error'] is None:
+            if response.error is None:
                 return 'Data written to the database successfully.'
             else:
-                return f"An error occurred: {response['error']}"
+                return f"An error occurred: {response.error.message}"
         except Exception as e:
             return f"An error occurred: {str(e)}"
