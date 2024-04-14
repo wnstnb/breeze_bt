@@ -13,7 +13,7 @@ class ProcessData:
         key: str = os.getenv("SUPABASE_KEY")
         self.supabase: Client = create_client(url, key)
 
-    def store_df(self, df_store: pd.DataFrame):
+    def store_df(self, df_store: pd.DataFrame, table_name: str):
         try:
             # Convert Timestamp, Timedelta and int32 objects to strings or int
             df_store = df_store.apply(lambda x: x.apply(lambda y: y.isoformat() if isinstance(y, (pd.Timestamp, pd.Timedelta)) else int(y) if isinstance(y, np.int32) else y))
@@ -28,9 +28,9 @@ class ProcessData:
                         json.dumps(value)
                     except TypeError:
                         return f"An error occurred: Object of type {type(value).__name__} in column '{key}' is not JSON serializable"
-
-            # Write the data to the 'strategy_stats' table
-            response = self.supabase.table('strategy_stats').upsert(data).execute()
+            
+            # Write the data to the named table
+            response = self.supabase.table(table_name).upsert(data).execute()
 
             # Check if the request was successful
             if response.error is None:
