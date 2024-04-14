@@ -6,8 +6,11 @@ from datetime import datetime
 import pytz
 from tqdm import tqdm
 import os
-import MySQLdb
+# import MySQLdb
+from data_process.store_strategy import ProcessData
 from dotenv import load_dotenv
+import numpy as np
+
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -73,17 +76,14 @@ if response.status_code == 200:
                     print(f"An error occurred while processing {file_name}: {e}")
                     continue
 
+        p = ProcessData()
+
         # Write each dataframe to its corresponding SQL table
         for file_name, df in dataframes.items():
+            print(file_name, len(df), df.head())
             table_name = file_name.replace('.txt', '')  # Get the table name from the file name
             table_name = table_name.replace('_month_', '_full_')  # swap names
-            insert_dataframe_to_sql(table_name, df, cursor)
-            print(f"Data from {file_name} written to the table {table_name}")
-
-else:
-    print("Failed to fetch the zip file.")
-
-# Close the cursor and connection
-cursor.close()
-connection.close()
-
+            chunks = np.array_split(df, np.ceil(len(df) / 1000))
+            for data in tqdm(chunks, desc=f"storing data in {table_name}..."):
+                insert_dataframe_to_sql = p.store_df(data, table_name)
+            # print(f"Data from {file_name} written to the table {table_name}")
