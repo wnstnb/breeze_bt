@@ -9,3 +9,5 @@ ta
 supabase
 python-dotenv
 tqdm
+pandas-datareader
+setuptools

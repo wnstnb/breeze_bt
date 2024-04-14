@@ -18,39 +18,6 @@ api_url = os.getenv("FIRSTRATEDATA_INCR_API")
 # Send a GET request to the API
 response = requests.get(api_url)
 
-# Function to write dataframe to SQL
-def insert_dataframe_to_sql(table_name, dataframe, cursor):
-    # Prepare the SQL insert statement
-    placeholders = ', '.join(['%s'] * len(dataframe.columns))
-    columns = ', '.join(dataframe.columns)
-
-    # Prepare the ON DUPLICATE KEY UPDATE part of the query
-    update_columns = ', '.join([f"{col} = VALUES({col})" for col in dataframe.columns])
-
-    sql = f"""INSERT INTO {table_name} ({columns}) VALUES ({placeholders})
-              ON DUPLICATE KEY UPDATE {update_columns}"""
-
-    # Convert dataframe to a list of tuples, handling NaN values
-    data = [tuple(row) if not any(pd.isna(val) for val in row) 
-            else tuple(None if pd.isna(val) else val for val in row) 
-            for row in dataframe.values]
-
-    # Execute the SQL command for each row
-    cursor.executemany(sql, data)
-
-# Connect to the database
-connection = MySQLdb.connect(
-  host=os.getenv("DATABASE_HOST"),
-  user=os.getenv("DATABASE_USERNAME"),
-  passwd=os.getenv("DATABASE_PASSWORD"),
-  db=os.getenv("DATABASE"),
-  autocommit=True,
-  ssl_mode="VERIFY_IDENTITY",
-  ssl={ "ca": "ca-certificates.crt" }
-)
-
-cursor = connection.cursor()
-
 # Check if the request was successful
 if response.status_code == 200:
     # Read the content of the response into a BytesIO object

@@ -6,13 +6,13 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 import os
 # import json
-import MySQLdb
+# import MySQLdb
+from data_process.store_strategy import ProcessData
 from dotenv import load_dotenv
+import numpy as np
 load_dotenv()
 
-# f = open('settings.json')
-# j = json.load(f)
-# API_KEY_FRED = j["API_KEY_FRED"]
+
 API_KEY_FRED = os.getenv('API_KEY_FRED')
 
 # Function to write dataframe to SQL
@@ -101,22 +101,15 @@ for rid in tqdm(release_ids, desc='Making indicators'):
 df_releases = pd.concat([releases[k]['df'] for k in releases.keys()], axis=1)
 df_releases = df_releases.fillna(0)
 df_releases.index.name = 'Datetime'
+df_releases = df_releases.astype(int)
 df_releases.reset_index(inplace=True)
+
+print(df_releases.head())
 # Connect to the database
 
-connection = MySQLdb.connect(
-  host=os.getenv("DATABASE_HOST"),
-  user=os.getenv("DATABASE_USERNAME"),
-  passwd=os.getenv("DATABASE_PASSWORD"),
-  db=os.getenv("DATABASE"),
-  autocommit=True,
-  ssl_mode="VERIFY_IDENTITY",
-  ssl={ "ca": "ca-certificates.crt" }
-)
-
-cursor = connection.cursor()
-insert_dataframe_to_sql('releases', df_releases, cursor)
-print(f"Data from df_releases written to the table releases")
-
-cursor.close()
-connection.close()
+table_name = 'releases'  # Get the table name from the file name
+chunks = np.array_split(df_releases, np.ceil(len(df_releases) / 500))
+for data in tqdm(chunks, desc=f"storing data in {table_name}..."):
+    p = ProcessData()
+    insert_dataframe_to_sql = p.store_df(data, table_name)
+# print(f"Data from {file_name} written to the table {table_name}")

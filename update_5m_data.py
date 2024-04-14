@@ -82,7 +82,7 @@ if response.status_code == 200:
             print(file_name, len(df), df.head())
             table_name = file_name.replace('.txt', '')  # Get the table name from the file name
             chunks = np.array_split(df, np.ceil(len(df) / 1000))
-            for data in tqdm(chunks, desc="storing data in chunks..."):
+            for data in tqdm(chunks, desc=f"storing data in {table_name}..."):
                 insert_dataframe_to_sql = p.store_df(data, table_name)
             # print(f"Data from {file_name} written to the table {table_name}")
 else:
