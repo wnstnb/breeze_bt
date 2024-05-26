@@ -11,3 +11,4 @@ python-dotenv
 tqdm
 pandas-datareader
 setuptools
+requests

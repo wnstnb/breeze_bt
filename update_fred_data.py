@@ -112,4 +112,5 @@ chunks = np.array_split(df_releases, np.ceil(len(df_releases) / 500))
 for data in tqdm(chunks, desc=f"storing data in {table_name}..."):
     p = ProcessData()
     insert_dataframe_to_sql = p.store_df(data, table_name)
+    
 # print(f"Data from {file_name} written to the table {table_name}")
